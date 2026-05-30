@@ -1,0 +1,158 @@
+name: devto
+version: 0.1.0
+dsl_version: 3
+description: Query articles, drafts, engagement metrics, and tags from dev.to (Forem).
+backend: http
+base_url: https://dev.to/api
+
+inputs:
+  DEVTO_API_KEY:
+    kind: secret
+    required: true
+    hint: |
+      Dev.to API key. Generate at https://dev.to/settings/extensions.
+      Sent as the literal `api-key` header (no Bearer prefix).
+      Required for `articles_me`; the public `articles` and `tags` tables work
+      without it but still send the header when present.
+
+auth:
+  type: HeaderAuth
+  headers:
+    - name: api-key
+      from: input
+      key: DEVTO_API_KEY
+
+tables:
+  - name: articles_me
+    description: Your own articles and drafts on dev.to with engagement stats. Requires DEVTO_API_KEY.
+    request:
+      method: GET
+      path: /articles/me
+      query:
+        - name: per_page
+          from: literal
+          value: "1000"
+        - name: state
+          from: literal
+          value: "all"
+    response:
+      format: json
+      rows_path: []
+    pagination:
+      mode: page
+      page_param: page
+      page_start: 1
+      max_pages: 50
+    columns:
+      - name: id
+        type: Int64
+      - name: title
+        type: Utf8
+      - name: description
+        type: Utf8
+      - name: slug
+        type: Utf8
+      - name: url
+        type: Utf8
+      - name: published
+        type: Boolean
+      - name: published_at
+        type: Utf8
+      - name: page_views_count
+        type: Int64
+      - name: positive_reactions_count
+        type: Int64
+      - name: public_reactions_count
+        type: Int64
+      - name: comments_count
+        type: Int64
+      - name: reading_time_minutes
+        type: Int64
+      - name: tag_list
+        type: Utf8
+
+  - name: articles
+    description: Public articles by a given dev.to username. No auth required.
+    request:
+      method: GET
+      path: /articles
+      query:
+        - name: username
+          from: filter
+          key: username
+        - name: per_page
+          from: literal
+          value: "1000"
+    response:
+      format: json
+      rows_path: []
+    pagination:
+      mode: page
+      page_param: page
+      page_start: 1
+      max_pages: 50
+    filters:
+      - name: username
+        type: Utf8
+        required: true
+        description: dev.to username to list articles for (e.g. ben).
+    columns:
+      - name: username
+        type: Utf8
+        virtual: true
+        description: dev.to username filter passed in WHERE.
+        expr:
+          kind: from_filter
+          key: username
+      - name: id
+        type: Int64
+      - name: title
+        type: Utf8
+      - name: description
+        type: Utf8
+      - name: slug
+        type: Utf8
+      - name: url
+        type: Utf8
+      - name: published_at
+        type: Utf8
+      - name: positive_reactions_count
+        type: Int64
+      - name: public_reactions_count
+        type: Int64
+      - name: comments_count
+        type: Int64
+      - name: reading_time_minutes
+        type: Int64
+      - name: tag_list
+        type: Utf8
+
+  - name: tags
+    description: Top tags on dev.to. No auth required.
+    request:
+      method: GET
+      path: /tags
+      query:
+        - name: per_page
+          from: literal
+          value: "100"
+    response:
+      format: json
+      rows_path: []
+    pagination:
+      mode: page
+      page_param: page
+      page_start: 1
+      max_pages: 10
+    columns:
+      - name: id
+        type: Int64
+      - name: name
+        type: Utf8
+      - name: bg_color_hex
+        type: Utf8
+      - name: text_color_hex
+        type: Utf8
+
+test_queries:
+  - "SELECT id, name FROM devto.tags LIMIT 1"

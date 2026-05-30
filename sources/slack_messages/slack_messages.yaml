@@ -1,0 +1,80 @@
+name: slack_messages
+version: 0.1.0
+dsl_version: 3
+description: Query channel messages from Slack workspaces.
+backend: http
+base_url: https://slack.com/api
+
+inputs:
+  SLACK_MESSAGES_TOKEN:
+    kind: secret
+    required: true
+    hint: |
+      Slack bot token (xoxb-...). Requires `channels:history` for public
+      channels and `groups:history` for private channels. Create a Slack app at
+      https://api.slack.com/apps, install to the workspace, copy the Bot User
+      OAuth Token, and invite the bot to each channel you want to query.
+
+auth:
+  type: HeaderAuth
+  headers:
+    - name: Authorization
+      from: template
+      template: Bearer {{input.SLACK_MESSAGES_TOKEN}}
+
+tables:
+  - name: messages
+    description: Channel messages from conversations.history. Requires `channel` (Slack channel ID).
+    request:
+      method: GET
+      path: /conversations.history
+      query:
+        - name: channel
+          from: filter
+          key: channel
+        - name: limit
+          from: literal
+          value: "200"
+    response:
+      format: json
+      rows_path:
+        - messages
+    pagination:
+      mode: cursor_query
+      cursor_param: cursor
+      response_cursor_path:
+        - response_metadata
+        - next_cursor
+    filters:
+      - name: channel
+        type: Utf8
+        required: true
+        description: Slack channel ID (e.g. C0B6VTW5J8G).
+    columns:
+      - name: channel
+        type: Utf8
+        virtual: true
+        description: Slack channel ID this row belongs to. Sourced from the WHERE filter.
+        expr:
+          kind: from_filter
+          key: channel
+      - name: ts
+        type: Utf8
+        description: Message timestamp string. Also serves as the message ID within a channel.
+      - name: type
+        type: Utf8
+      - name: subtype
+        type: Utf8
+        description: Slack subtype such as `channel_join`. Null for ordinary user messages.
+      - name: user
+        type: Utf8
+        description: Slack user ID of the message author. Resolve via `slack.users`.
+      - name: text
+        type: Utf8
+      - name: thread_ts
+        type: Utf8
+      - name: reply_count
+        type: Int64
+
+test_queries:
+  - "SELECT ts, text FROM slack_messages.messages WHERE channel = 'C0B6VTW5J8G' LIMIT 1"

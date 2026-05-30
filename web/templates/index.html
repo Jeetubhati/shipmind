@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ShipMind — release readiness</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #161b22;
+      --panel-2: #1c2128;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --muted: #8b949e;
+      --accent: #3fb950;
+      --accent-2: #2da44e;
+      --warn: #d29922;
+      --error: #db6d28;
+      --fatal: #f85149;
+      --info: #58a6ff;
+      --done: #3fb950;
+      --shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    code, .mono { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; }
+
+    header.site {
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
+      padding: 16px 24px;
+      position: sticky; top: 0; z-index: 10;
+    }
+    header.site .row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 24px; max-width: 1400px; margin: 0 auto;
+    }
+    .brand { display: flex; align-items: baseline; gap: 12px; }
+    .brand .flag { font-size: 28px; line-height: 1; }
+    .brand .name { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+    .brand .name .accent { color: var(--accent); }
+    .brand .tag {
+      font-size: 11px; padding: 3px 8px; border-radius: 999px;
+      background: rgba(63,185,80,0.12); color: var(--accent);
+      border: 1px solid rgba(63,185,80,0.4); font-weight: 600;
+    }
+
+    .sources { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 999px; font-size: 12px;
+      background: var(--panel-2); border: 1px solid var(--border); color: var(--muted);
+    }
+    .pill .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 6px var(--accent);
+    }
+    .pill.off .dot { background: var(--fatal); box-shadow: 0 0 6px var(--fatal); }
+
+    button.primary {
+      background: var(--accent); color: #0d1117; border: none;
+      padding: 9px 18px; border-radius: 6px; font-weight: 600;
+      cursor: pointer; font-size: 14px; transition: background 120ms ease;
+    }
+    button.primary:hover { background: var(--accent-2); }
+    button.primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    button.ghost {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px;
+      font-size: 13px; cursor: pointer; transition: border-color 120ms ease;
+    }
+    button.ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    main {
+      max-width: 1400px; margin: 0 auto; padding: 28px 24px 64px;
+    }
+
+    .hero {
+      display: grid; grid-template-columns: 220px 1fr; gap: 28px;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px; box-shadow: var(--shadow);
+      margin-bottom: 28px;
+    }
+    .gauge-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .gauge { position: relative; width: 180px; height: 180px; }
+    .gauge svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .gauge .ring-bg { fill: none; stroke: #30363d; stroke-width: 14; }
+    .gauge .ring-fg {
+      fill: none; stroke: var(--accent); stroke-width: 14; stroke-linecap: round;
+      transition: stroke-dasharray 1200ms cubic-bezier(0.4, 0, 0.2, 1), stroke 300ms ease;
+    }
+    .gauge .label {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .gauge .label .num { font-size: 44px; font-weight: 700; letter-spacing: -0.02em; }
+    .gauge .label .of { font-size: 12px; color: var(--muted); margin-top: -4px; }
+
+    .verdict-area { display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+    .verdict-badge {
+      display: inline-flex; align-items: center; gap: 8px; align-self: flex-start;
+      padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 14px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .verdict-badge.SHIP { background: rgba(63,185,80,0.15); color: var(--accent); border: 1px solid rgba(63,185,80,0.5); }
+    .verdict-badge.SHIP-WITH-CAUTION { background: rgba(210,153,34,0.15); color: var(--warn); border: 1px solid rgba(210,153,34,0.5); }
+    .verdict-badge.HOLD { background: rgba(248,81,73,0.15); color: var(--fatal); border: 1px solid rgba(248,81,73,0.5); }
+    .verdict-badge.UNKNOWN { background: rgba(139,148,158,0.15); color: var(--muted); border: 1px solid rgba(139,148,158,0.4); }
+
+    .verdict-reason { color: var(--text); font-size: 15px; max-width: 720px; }
+    .verdict-meta { color: var(--muted); font-size: 12px; }
+
+    .grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow);
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .card-title { font-size: 17px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 8px; }
+    .card-title .glyph { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+    .card-title .glyph.blockers { background: var(--fatal); }
+    .card-title .glyph.readiness { background: var(--warn); }
+    .card-title .glyph.risk { background: var(--error); }
+    .card-title .glyph.signals { background: var(--info); }
+    .card-title .glyph.velocity { background: var(--done); }
+    .card-sub { color: var(--muted); font-size: 13px; margin: 0; }
+
+    .card-meta {
+      display: flex; gap: 12px; font-size: 12px; color: var(--muted);
+      align-items: center;
+    }
+    .card-meta b { color: var(--text); font-weight: 600; }
+
+    details.sql {
+      background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px;
+      padding: 0; overflow: hidden;
+    }
+    details.sql > summary {
+      list-style: none; cursor: pointer; padding: 8px 12px; font-size: 12px;
+      color: var(--muted); user-select: none;
+    }
+    details.sql > summary::-webkit-details-marker { display: none; }
+    details.sql > summary::before { content: "▸ "; color: var(--muted); }
+    details.sql[open] > summary::before { content: "▾ "; }
+    details.sql pre {
+      margin: 0; padding: 12px; font-size: 12px; line-height: 1.55;
+      color: #e6edf3; overflow-x: auto; background: #0d1117;
+      border-top: 1px solid var(--border);
+    }
+
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; }
+    table {
+      width: 100%; border-collapse: collapse; font-size: 12.5px;
+    }
+    th, td {
+      text-align: left; padding: 8px 12px; vertical-align: top;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: var(--panel-2); color: var(--muted); font-weight: 600;
+      font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase;
+      position: sticky; top: 0;
+    }
+    tr:last-child td { border-bottom: none; }
+    td { color: var(--text); max-width: 360px; word-wrap: break-word; }
+
+    .sev { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .sev.fatal   { background: rgba(248,81,73,0.18); color: var(--fatal); }
+    .sev.error   { background: rgba(219,109,40,0.18); color: var(--error); }
+    .sev.warning { background: rgba(210,153,34,0.18); color: var(--warn); }
+    .sev.info    { background: rgba(88,166,255,0.18); color: var(--info); }
+    .sev.done    { background: rgba(63,185,80,0.18); color: var(--done); }
+
+    .analysis {
+      background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px;
+      padding: 12px 14px; font-size: 13px; line-height: 1.6; white-space: pre-wrap;
+    }
+    .analysis-label {
+      font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 6px;
+    }
+
+    .empty { color: var(--muted); font-style: italic; padding: 10px 0; font-size: 13px; }
+    .errbox {
+      background: rgba(248,81,73,0.08); border: 1px solid rgba(248,81,73,0.3);
+      color: var(--fatal); padding: 10px 12px; border-radius: 6px; font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+    }
+
+    .spin {
+      display: inline-block; width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid var(--muted); border-top-color: var(--accent);
+      animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .footer-note {
+      text-align: center; margin-top: 32px; color: var(--muted);
+      font-size: 12px;
+    }
+    .footer-note .mono { color: var(--text); }
+
+    @media (max-width: 880px) {
+      .hero { grid-template-columns: 1fr; }
+      .gauge-wrap { align-items: flex-start; }
+      header.site .row { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site">
+    <div class="row">
+      <div class="brand">
+        <span class="flag">🏴‍☠️</span>
+        <span class="name">Ship<span class="accent">Mind</span></span>
+        <span class="tag">Coral · Track 1</span>
+      </div>
+      <div id="sources" class="sources" aria-label="Connected sources">
+        {% for src in sources %}
+          <span class="pill"><span class="dot"></span>{{ src }}</span>
+        {% endfor %}
+        {% if not connected %}
+          <span class="pill off"><span class="dot"></span>coral down</span>
+        {% endif %}
+      </div>
+      <button id="run-all" class="primary">Run Full Release Check</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-label="Release readiness score">
+      <div class="gauge-wrap">
+        <div class="gauge" role="img" aria-label="Release readiness score">
+          <svg viewBox="0 0 180 180">
+            <circle class="ring-bg" cx="90" cy="90" r="78" />
+            <circle id="ring" class="ring-fg" cx="90" cy="90" r="78"
+                    stroke-dasharray="0 490" />
+          </svg>
+          <div class="label">
+            <span id="gauge-num" class="num">—</span>
+            <span class="of">out of 100</span>
+          </div>
+        </div>
+      </div>
+      <div class="verdict-area">
+        <span id="verdict" class="verdict-badge UNKNOWN">Awaiting check</span>
+        <p id="verdict-reason" class="verdict-reason">
+          Click <b>Run Full Release Check</b> to run all 5 cross-source queries
+          through Coral and ask Claude for a recommendation.
+        </p>
+        <div id="verdict-meta" class="verdict-meta"></div>
+      </div>
+    </section>
+
+    <section class="grid" id="cards">
+      {% for key, q in queries.items() %}
+        <article class="card" id="card-{{ key }}" data-key="{{ key }}">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">
+                <span class="glyph {{ key }}"></span>{{ q.title }}
+              </h2>
+              <p class="card-sub">{{ q.description }}</p>
+            </div>
+            <button class="ghost run-one" data-key="{{ key }}">Run</button>
+          </div>
+
+          <div class="card-meta" data-role="meta"><span>Not run yet.</span></div>
+
+          <details class="sql">
+            <summary>Show SQL</summary>
+            <pre>{{ q.sql.strip() }}</pre>
+          </details>
+
+          <div data-role="result"></div>
+          <div data-role="analysis"></div>
+        </article>
+      {% endfor %}
+    </section>
+
+    <p class="footer-note">
+      Coral SQL · Claude · 4 connected sources + 1 custom Slack messages source +
+      <span class="mono">devto</span> bounty spec ·
+      <span class="mono">localhost:5000</span>
+    </p>
+  </main>
+
+  <script>
+  (function () {
+    const RING_CIRCUMFERENCE = 2 * Math.PI * 78; // ~490
+
+    const $ = (sel, root) => (root || document).querySelector(sel);
+    const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+
+    function escapeHtml(s) {
+      if (s === null || s === undefined) return "";
+      return String(s)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
+
+    function fmtCell(col, val) {
+      if (val === null || val === undefined || val === "") return "";
+      const lower = String(val).toLowerCase();
+      const sevKeys = ["severity", "level", "error_level", "linear_state", "pr_state", "status"];
+      if (sevKeys.includes(col)) {
+        let cls = "info";
+        if (["fatal"].includes(lower)) cls = "fatal";
+        else if (["error", "closed"].includes(lower)) cls = "error";
+        else if (["warning", "in progress", "in review"].includes(lower)) cls = "warning";
+        else if (["done", "merged", "open"].includes(lower)) cls = "done";
+        return '<span class="sev ' + cls + '">' + escapeHtml(val) + "</span>";
+      }
+      return escapeHtml(val);
+    }
+
+    function renderTable(cols, rows) {
+      if (!rows || rows.length === 0) return '<div class="empty">No matching rows.</div>';
+      const thead = "<tr>" + cols.map(c => "<th>" + escapeHtml(c) + "</th>").join("") + "</tr>";
+      const tbody = rows.map(r =>
+        "<tr>" + cols.map(c => "<td>" + fmtCell(c, r[c]) + "</td>").join("") + "</tr>"
+      ).join("");
+      return '<div class="table-wrap"><table>' + thead + tbody + "</table></div>";
+    }
+
+    function setLoading(card, label) {
+      const meta = $('[data-role="meta"]', card);
+      meta.innerHTML = '<span class="spin"></span>' + escapeHtml(label || "Running…");
+      $('[data-role="result"]', card).innerHTML = "";
+      $('[data-role="analysis"]', card).innerHTML = "";
+      card.querySelectorAll(".run-one").forEach(b => b.disabled = true);
+    }
+
+    function paintResult(card, payload) {
+      const meta = $('[data-role="meta"]', card);
+      const res = $('[data-role="result"]', card);
+      const an = $('[data-role="analysis"]', card);
+
+      // Defensive: result-by-card shape (from /api/query/<key>) is payload.data,
+      // full-check shape (from /api/check) is the payload object itself.
+      const data = payload.data || payload;
+      const rowCount = data.row_count !== undefined ? data.row_count : (data.rows ? data.rows.length : 0);
+      const duration = data.duration_ms;
+      const cols = data.columns || [];
+      const rows = data.rows || [];
+      const err = data.error;
+      const analysis = payload.analysis;
+
+      if (err) {
+        meta.innerHTML = '<span style="color:var(--fatal)">✗ Failed</span>';
+        res.innerHTML = '<div class="errbox">' + escapeHtml(err) + '</div>';
+        an.innerHTML = "";
+      } else {
+        meta.innerHTML =
+          "<span><b>" + rowCount + "</b> rows</span>" +
+          (duration ? "<span>" + duration + " ms</span>" : "") +
+          (cols.length ? "<span>" + cols.length + " cols</span>" : "");
+        res.innerHTML = renderTable(cols, rows);
+      }
+
+      if (analysis) {
+        an.innerHTML =
+          '<div class="analysis-label">Claude analysis</div>' +
+          '<div class="analysis">' + escapeHtml(analysis) + '</div>';
+      } else if (!err) {
+        an.innerHTML = '<div class="empty">No analysis (set ANTHROPIC_API_KEY).</div>';
+      }
+
+      card.querySelectorAll(".run-one").forEach(b => b.disabled = false);
+    }
+
+    function animateGauge(target) {
+      const ring = $("#ring");
+      const num = $("#gauge-num");
+      const clamped = Math.max(0, Math.min(100, target));
+      const filled = (clamped / 100) * RING_CIRCUMFERENCE;
+      ring.setAttribute("stroke-dasharray", filled + " " + RING_CIRCUMFERENCE);
+
+      let color = "var(--accent)";
+      if (clamped < 50) color = "var(--fatal)";
+      else if (clamped < 75) color = "var(--warn)";
+      ring.style.stroke = color;
+
+      // count up
+      let start = 0;
+      const dur = 900;
+      const t0 = performance.now();
+      function step(t) {
+        const k = Math.min(1, (t - t0) / dur);
+        const v = Math.round(start + (clamped - start) * k);
+        num.textContent = v;
+        if (k < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    function setVerdict(score) {
+      const badge = $("#verdict");
+      const reason = $("#verdict-reason");
+      const meta = $("#verdict-meta");
+
+      const verdict = (score.verdict || "UNKNOWN").toUpperCase();
+      const cssVerdict = verdict.replace(/\s+/g, "-");
+      badge.className = "verdict-badge " + cssVerdict;
+      badge.textContent = verdict;
+      reason.textContent = score.reasoning || "";
+      meta.textContent = "Score generated at " + new Date().toLocaleTimeString();
+    }
+
+    async function runOne(key) {
+      const card = $("#card-" + key);
+      setLoading(card, "Querying Coral…");
+      try {
+        const r = await fetch("/api/query/" + encodeURIComponent(key));
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        const payload = await r.json();
+        paintResult(card, payload);
+      } catch (e) {
+        const meta = $('[data-role="meta"]', card);
+        meta.innerHTML = '<span style="color:var(--fatal)">Request failed: ' +
+          escapeHtml(e.message) + '</span>';
+        card.querySelectorAll(".run-one").forEach(b => b.disabled = false);
+      }
+    }
+
+    async function runAll() {
+      const btn = $("#run-all");
+      btn.disabled = true;
+      const original = btn.textContent;
+      btn.innerHTML = '<span class="spin"></span>Running 5 queries…';
+
+      // Mark every card loading so the user sees motion.
+      $$(".card").forEach(c => setLoading(c, "Queued…"));
+
+      try {
+        const r = await fetch("/api/check", { method: "POST" });
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        const payload = await r.json();
+        for (const key of Object.keys(payload.checks)) {
+          paintResult($("#card-" + key), payload.checks[key]);
+        }
+        animateGauge(payload.score.score || 0);
+        setVerdict(payload.score);
+      } catch (e) {
+        alert("Full check failed: " + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    }
+
+    document.addEventListener("click", (e) => {
+      const one = e.target.closest(".run-one");
+      if (one) { runOne(one.dataset.key); return; }
+      if (e.target.id === "run-all") { runAll(); return; }
+    });
+  })();
+  </script>
+</body>
+</html>

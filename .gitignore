@@ -1,0 +1,25 @@
+.env
+.env.local
+venv/
+__pycache__/
+*.pyc
+
+# Coral local state and the install zip we pulled in Day 1
+coral.zip
+coral_bin/
+.coral/
+
+# Clone of withcoral/coral fork used for the dev.to bounty PR
+coral-fork/
+
+# Skill installer artifacts and resolved skill caches
+skills-lock.json
+.agents/
+.claude/
+
+node_modules/
+*.log
+
+# OS junk
+Thumbs.db
+.DS_Store

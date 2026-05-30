@@ -1,0 +1,15 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 2rem;
+  max-width: 960px;
+  margin-inline: auto;
+}
+
+h1 {
+  margin-bottom: 0.25rem;
+}
