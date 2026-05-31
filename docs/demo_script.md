@@ -3,13 +3,20 @@
 Total target: **2:45** (under the hackathon 3-min cap).
 Recording tool: Windows Game Bar (`Win + G` → Record, or `Win + Alt + R`).
 
+ShipMind's LLM layer is pluggable: it auto-detects **Groq (Llama 3.3
+70B)** or **Anthropic (Claude Sonnet 4.6)** at startup. The default
+demo runs on **Groq** because it's fast (~1 s per analysis) and free.
+
 ## Before you start recording
 
 1. **Pre-warm the data.** Full release check takes ~90 s against
    `withcoral/coral` (500+ PRs). Don't make the audience watch that.
    Open `http://localhost:5000` and click **Run Full Release Check**
    once before recording. Let it finish. Leave the tab open.
-2. Make sure the gauge shows a real score and all 5 cards are filled.
+2. The gauge should show a real score and all 5 cards should have
+   filled analyses from Llama 3.3 70B (you'll see the "Groq · Llama
+   3.3 70B" pill in the header — that's the visual proof the LLM is
+   live).
 3. Open a second window: a clean PowerShell terminal in the project
    directory. Type `coral sql "SELECT schema_name, table_name FROM coral.tables LIMIT 1"` so the cursor history is set up.
 4. Resize: terminal on the left half, browser on the right half.
@@ -24,8 +31,8 @@ Recording tool: Windows Game Bar (`Win + G` → Record, or `Win + Alt + R`).
 > "Before every release, an engineer opens four tabs: GitHub, Linear,
 > Sentry, Slack. They piece together whether it's safe to ship. It
 > takes about 40 minutes and they still miss things. ShipMind does it
-> in one dashboard backed by one SQL query language. Built on Coral
-> and Claude."
+> in one dashboard backed by one SQL query language. Built on Coral,
+> with Llama 3.3 70B served by Groq doing the analysis."
 
 ## [0:20 – 0:45] The Coral foundation
 
@@ -46,8 +53,15 @@ coral sql "SELECT schema_name, table_name FROM coral.tables WHERE schema_name IN
 *Switch to the browser. Scroll to the top.*
 
 > "Here's the dashboard. The score is **74 — Ship with Caution**.
-> Claude generated this by looking at the results of all 5 release
-> checks at once."
+> Llama 3.3 70B generated this by looking at the results of all 5
+> release checks at once."
+
+*Point at the "Groq · Llama 3.3 70B" pill in the top right.*
+
+> "That pill in the header shows the active LLM. I picked Groq for
+> the demo because it's fast and free — Llama 3.3 70B comes back in
+> about a second. The same architecture works on Anthropic if you'd
+> rather use Claude."
 
 *Move cursor across the 5 card titles — Blockers, Readiness, Risk,
 Signals, Velocity.*
@@ -73,11 +87,12 @@ to expand the SQL panel.*
 > data."
 
 *Scroll down inside the card to show the results table — real PR
-titles next to real error titles.*
+titles next to real error titles, then the analysis from Llama.*
 
 > "These are real merged PRs from the Coral repo cross-referenced with
-> real errors. The analysis underneath is Claude reading the table and
-> telling me what to actually do."
+> real errors. The analysis underneath is Llama reading the table and
+> telling me what to actually do. The 'LLM analysis · Groq · Llama
+> 3.3 70B' label tells you exactly which model produced it."
 
 ## [1:45 – 2:15] Team signals from Slack
 
@@ -91,8 +106,9 @@ titles next to real error titles.*
 "blocker: JWT auth PR is still in review" and "deploy checklist for
 v1.0".*
 
-> "And here, Claude reads those messages and notes the JWT auth
-> blocker explicitly."
+> "And here, Llama reads those messages and notes the JWT auth
+> blocker explicitly — calls it out as the thing to fix before
+> shipping."
 
 ## [2:15 – 2:35] Readiness — Linear vs GitHub
 
@@ -118,7 +134,7 @@ v1.0".*
 *Back to dashboard, gauge in centre frame.*
 
 > "ShipMind. Four tabs and forty minutes, collapsed to one dashboard
-> and one cross-source query. Built with Coral and Claude in four days."
+> and one cross-source query. Built on Coral and Llama in four days."
 
 *End screen with GitHub URL.*
 
@@ -138,3 +154,6 @@ v1.0".*
 - **Full check button is slow live** → switch to running a single
   card with **Run** — those finish in seconds (signals: 1 s,
   velocity: 3 s, blockers: 2 s).
+- **LLM pill shows "no LLM (stub mode)"** → your `GROQ_API_KEY` env
+  var isn't loaded. Check `.env` is at the project root and restart
+  Flask.

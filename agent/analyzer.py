@@ -42,6 +42,15 @@ def _make_client():
 _PROVIDER, _CLIENT, _MODEL = _make_client()
 
 
+def get_llm_info() -> dict:
+    """Return the active LLM provider so the UI can render a 'powered by' badge."""
+    if _PROVIDER == "groq":
+        return {"provider": "groq", "label": "Groq · Llama 3.3 70B", "model": _MODEL}
+    if _PROVIDER == "anthropic":
+        return {"provider": "anthropic", "label": f"Anthropic · {_MODEL}", "model": _MODEL}
+    return {"provider": "none", "label": "no LLM (stub mode)", "model": None}
+
+
 def _chat(user_content: str, max_tokens: int = 600) -> str:
     """Call the active provider with a single user-content message. Returns text."""
     if _PROVIDER == "groq":

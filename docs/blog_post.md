@@ -1,6 +1,6 @@
-# I built a Release Intelligence Agent in 4 days with Claude Code + Coral (here's the exact route)
+# I built a Release Intelligence Agent in 4 days with Coral, Groq Llama, and Claude Code (here's the exact route)
 
-> 4 days. 5 cross-source SQL queries. One dashboard that tells you whether to ship. Built solo for Pirates of the Coral-bean.
+> 4 days. 5 cross-source SQL queries. One dashboard that tells you whether to ship. Coral for the data, Llama 3.3 70B (served by Groq) for the analysis, Claude Code as my pair programmer. Built solo for Pirates of the Coral-bean.
 
 ## The problem every team has but nobody owns
 
@@ -60,8 +60,11 @@ score for a future event. And confidence comes from correlating signals
 across surfaces no one source can see.
 
 ShipMind tries to be that proactive gate. Five questions, each backed
-by a real SQL query, then a Claude pass on top to turn the data into a
-SHIP / SHIP WITH CAUTION / HOLD recommendation.
+by a real SQL query, then an LLM pass on top to turn the data into a
+SHIP / SHIP WITH CAUTION / HOLD recommendation. I shipped it with
+**Llama 3.3 70B via Groq** because it's fast (~1 s per analysis) and
+free — but the provider is pluggable: drop in an Anthropic key and
+the same code talks to Claude instead.
 
 ## Architecture
 
@@ -69,7 +72,8 @@ SHIP / SHIP WITH CAUTION / HOLD recommendation.
 Browser ─▶ Flask (web/app.py)
               │
               ▼
-        Claude Sonnet 4.6  ◀── 5 release questions
+   Groq · Llama 3.3 70B  ◀── 5 release questions
+   (or Anthropic Claude)     (provider auto-detected)
               │
               ▼
         Coral CLI (`coral sql ...`)
@@ -81,7 +85,8 @@ Browser ─▶ Flask (web/app.py)
 ```
 
 - **agent/** holds the brain: a tiny subprocess wrapper around
-  `coral sql`, the five release queries, the Claude analyser.
+  `coral sql`, the five release queries, and a thin LLM analyser
+  that picks Groq or Anthropic at startup.
 - **web/app.py** is ~80 lines of Flask with four routes.
 - **templates/index.html** is the entire dashboard — HTML, CSS, vanilla
   JS, no CDN, no framework. The whole dashboard ships in one file you
@@ -220,7 +225,7 @@ Flask + a single HTML file. Four endpoints:
 - `GET /` — renders the dashboard with the source pills
 - `GET /api/status` — JSON: are the sources up
 - `GET /api/query/<name>` — runs one of the five queries
-- `POST /api/check` — runs all five and asks Claude for a score
+- `POST /api/check` — runs all five and asks the LLM for a score
 
 The HTML uses CSS Grid for the card layout and an inline SVG circle
 with `stroke-dasharray` for the score gauge. No CDN. The whole
@@ -228,9 +233,13 @@ template is ~640 lines and includes the JavaScript. I can grep it in
 one file. I will not give that up for any framework, ever, in a
 4-day project.
 
-The analyser falls back to a deterministic stub when there's no
-Anthropic API key. So the dashboard demos correctly on a machine
-without Claude credentials.
+The analyser auto-detects the provider at startup: `GROQ_API_KEY` set
+→ Groq. `ANTHROPIC_API_KEY` set → Anthropic. Neither set → a
+deterministic stub that still surfaces row counts and "SHIP WITH
+CAUTION" so the dashboard demos correctly on a machine without any
+LLM credits. The dashboard header shows a coloured pill — "Groq ·
+Llama 3.3 70B" or "Anthropic · claude-sonnet-4-6" — so you always
+know who answered.
 
 ## How to run ShipMind yourself
 
@@ -254,7 +263,10 @@ coral source add slack
 coral source add --file sources/slack_messages/slack_messages.yaml
 
 cp .env.example .env
-# edit .env with ANTHROPIC_API_KEY and your channel/team IDs
+# edit .env. Set ONE of:
+#   GROQ_API_KEY=gsk_…       (free at console.groq.com, recommended)
+#   ANTHROPIC_API_KEY=sk-…   (if you have Claude credits)
+# plus your channel/team IDs.
 
 python web/app.py
 # → http://localhost:5000

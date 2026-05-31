@@ -16,11 +16,11 @@ Fill the blanks as you go. Anything `<…>` is a placeholder.
 - **Track:** Track 1 — Enterprise Agent
 - **Project name:** ShipMind
 - **Tagline (≤140 chars):**
-  > Know before you ship — joins GitHub, Linear, Sentry, Slack in one Coral SQL query, then asks Claude to score the release.
+  > Know before you ship — joins GitHub, Linear, Sentry, Slack in one Coral SQL query, then asks Llama 3.3 70B (Groq) to score the release.
 - **GitHub:** `https://github.com/Jeetubhati/shipmind`
 - **Demo:** `<demo video URL>`
 - **Description (≤280 chars):**
-  > Release intelligence agent for engineering teams. Joins GitHub PRs, Linear issues, Sentry errors, and Slack signals in one Coral SQL query to answer: is this safe to ship? Includes 0–100 readiness score and Claude-powered analysis.
+  > Release intelligence agent for engineering teams. Joins GitHub PRs, Linear issues, Sentry errors, and Slack signals in one Coral SQL query to answer: is this safe to ship? Includes 0–100 readiness score by Llama 3.3 70B served on Groq (Anthropic Claude pluggable too).
 
 ## Bounties
 
@@ -40,8 +40,9 @@ Fill the blanks as you go. Anything `<…>` is a placeholder.
 - [x] **Creativity** — proactive release-gate, not a reactive incident
       tool.
 - [x] **Technical** — 6 sources total (4 bundled + 2 custom-authored),
-      real cross-source JOINs, working Flask web app, Claude analysis
-      layer with no-key fallback.
+      real cross-source JOINs, working Flask web app, pluggable LLM
+      analysis layer (Groq Llama 3.3 70B by default, Anthropic Claude
+      Sonnet 4.6 supported) with stub fallback when no key is set.
 - [x] **Best Use of Coral** — the GitHub ⋈ Sentry time-overlap JOIN
       and the Linear ⋈ GitHub identifier-LIKE JOIN are the unique value
       props; impossible without Coral.
@@ -57,7 +58,9 @@ Fill the blanks as you go. Anything `<…>` is a placeholder.
       risk-assessment query — GitHub ⋈ Sentry)
 - [ ] The web dashboard with the score gauge populated
 - [ ] At least 3 of the 5 cards showing real data
-- [ ] Claude analysis text visible on at least one card
+- [ ] LLM analysis text visible on at least one card
+      (label reads "LLM analysis · Groq · Llama 3.3 70B")
+- [ ] The provider pill ("Groq · Llama 3.3 70B") visible in the header
 - [ ] The SQL `<details>` panel expanded on at least one card
 
 ## Things that are easy to forget

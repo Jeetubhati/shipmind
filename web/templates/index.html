@@ -64,6 +64,25 @@
       background: var(--accent); box-shadow: 0 0 6px var(--accent);
     }
     .pill.off .dot { background: var(--fatal); box-shadow: 0 0 6px var(--fatal); }
+    .pill.llm {
+      background: rgba(255, 122, 32, 0.10);
+      border-color: rgba(255, 122, 32, 0.4);
+      color: #ffb38a;
+      font-weight: 600;
+    }
+    .pill.llm .dot { background: #ff7a20; box-shadow: 0 0 6px #ff7a20; }
+    .pill.llm.anthropic {
+      background: rgba(216, 99, 49, 0.10);
+      border-color: rgba(216, 99, 49, 0.4);
+      color: #f0c0a8;
+    }
+    .pill.llm.anthropic .dot { background: #d86331; box-shadow: 0 0 6px #d86331; }
+    .pill.llm.none {
+      background: rgba(139,148,158,0.10);
+      border-color: rgba(139,148,158,0.3);
+      color: var(--muted);
+    }
+    .pill.llm.none .dot { background: var(--muted); box-shadow: none; }
 
     button.primary {
       background: var(--accent); color: #0d1117; border: none;
@@ -236,6 +255,9 @@
         {% if not connected %}
           <span class="pill off"><span class="dot"></span>coral down</span>
         {% endif %}
+        <span class="pill llm {{ llm.provider }}" title="LLM provider used for analysis and the release-readiness score">
+          <span class="dot"></span>{{ llm.label }}
+        </span>
       </div>
       <button id="run-all" class="primary">Run Full Release Check</button>
     </div>
@@ -260,7 +282,7 @@
         <span id="verdict" class="verdict-badge UNKNOWN">Awaiting check</span>
         <p id="verdict-reason" class="verdict-reason">
           Click <b>Run Full Release Check</b> to run all 5 cross-source queries
-          through Coral and ask Claude for a recommendation.
+          through Coral and ask {{ llm.label }} for a recommendation.
         </p>
         <div id="verdict-meta" class="verdict-meta"></div>
       </div>
@@ -293,8 +315,8 @@
     </section>
 
     <p class="footer-note">
-      Coral SQL · Claude · 4 connected sources + 1 custom Slack messages source +
-      <span class="mono">devto</span> bounty spec ·
+      Coral SQL · {{ llm.label }} · 4 bundled sources + custom
+      <span class="mono">slack_messages</span> + <span class="mono">devto</span> bounty spec ·
       <span class="mono">localhost:5000</span>
     </p>
   </main>
@@ -302,6 +324,7 @@
   <script>
   (function () {
     const RING_CIRCUMFERENCE = 2 * Math.PI * 78; // ~490
+    const LLM_LABEL = {{ llm.label | tojson }};
 
     const $ = (sel, root) => (root || document).querySelector(sel);
     const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
@@ -374,10 +397,10 @@
 
       if (analysis) {
         an.innerHTML =
-          '<div class="analysis-label">Claude analysis</div>' +
+          '<div class="analysis-label">LLM analysis &middot; ' + escapeHtml(LLM_LABEL) + '</div>' +
           '<div class="analysis">' + escapeHtml(analysis) + '</div>';
       } else if (!err) {
-        an.innerHTML = '<div class="empty">No analysis (set ANTHROPIC_API_KEY).</div>';
+        an.innerHTML = '<div class="empty">No analysis (set GROQ_API_KEY or ANTHROPIC_API_KEY).</div>';
       }
 
       card.querySelectorAll(".run-one").forEach(b => b.disabled = false);

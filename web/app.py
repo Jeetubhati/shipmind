@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "agent"))
 
 from coral_runner import check_connection, run_query  # noqa: E402
 from queries import RELEASE_QUERIES  # noqa: E402
-from analyzer import analyze_results, run_full_release_check  # noqa: E402
+from analyzer import analyze_results, get_llm_info, run_full_release_check  # noqa: E402
 
 app = Flask(__name__)
 
@@ -20,12 +20,15 @@ def index():
         sources=conn.get("sources", []),
         connected=conn["connected"],
         queries=RELEASE_QUERIES,
+        llm=get_llm_info(),
     )
 
 
 @app.route("/api/status")
 def status():
-    return jsonify(check_connection())
+    payload = check_connection()
+    payload["llm"] = get_llm_info()
+    return jsonify(payload)
 
 
 @app.route("/api/query/<query_name>")
