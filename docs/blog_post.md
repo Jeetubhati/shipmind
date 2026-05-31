@@ -201,8 +201,8 @@ I wrote two source specs:
 - `sources/slack_messages/` — wraps `conversations.history` so messages
   are a regular table with a `channel` filter. This was for me; it
   makes ShipMind's SQL look uniform across sources.
-- `sources/devto/` — three tables (`articles_me`, `articles`, `tags`)
-  for the dev.to (Forem) public API. Submitted as a community PR to
+- `sources/devto/` — two public tables (`articles`, `tags`) for the
+  dev.to (Forem) public API. Submitted as a community PR to
   `withcoral/coral`.
 
 Authoring these taught me what a source spec actually is: it's a tiny

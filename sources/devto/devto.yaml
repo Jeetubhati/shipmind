@@ -1,76 +1,21 @@
 name: devto
 version: 0.1.0
 dsl_version: 3
-description: Query articles, drafts, engagement metrics, and tags from dev.to (Forem).
+description: Query public articles and top tags from dev.to (Forem). No auth required.
 backend: http
 base_url: https://dev.to/api
 
-inputs:
-  DEVTO_API_KEY:
-    kind: secret
-    required: true
-    hint: |
-      Dev.to API key. Generate at https://dev.to/settings/extensions.
-      Sent as the literal `api-key` header (no Bearer prefix).
-      Required for `articles_me`; the public `articles` and `tags` tables work
-      without it but still send the header when present.
-
-auth:
-  type: HeaderAuth
-  headers:
-    - name: api-key
-      from: input
-      key: DEVTO_API_KEY
+# Public-only source. No `inputs` and no `auth` block — register and query
+# immediately without credentials.
+#
+# A future revision can add `articles_me` (your own articles + drafts), which
+# requires a DEVTO_API_KEY. That table is kept out of this manifest because
+# Coral's current DSL treats any `from: input` reference as required at
+# `coral source add` time, even when the input is marked `required: false`.
+# Re-including it without a credential would prevent registering the source
+# at all — including for users who only want the public tables.
 
 tables:
-  - name: articles_me
-    description: Your own articles and drafts on dev.to with engagement stats. Requires DEVTO_API_KEY.
-    request:
-      method: GET
-      path: /articles/me
-      query:
-        - name: per_page
-          from: literal
-          value: "1000"
-        - name: state
-          from: literal
-          value: "all"
-    response:
-      format: json
-      rows_path: []
-    pagination:
-      mode: page
-      page_param: page
-      page_start: 1
-      max_pages: 50
-    columns:
-      - name: id
-        type: Int64
-      - name: title
-        type: Utf8
-      - name: description
-        type: Utf8
-      - name: slug
-        type: Utf8
-      - name: url
-        type: Utf8
-      - name: published
-        type: Boolean
-      - name: published_at
-        type: Utf8
-      - name: page_views_count
-        type: Int64
-      - name: positive_reactions_count
-        type: Int64
-      - name: public_reactions_count
-        type: Int64
-      - name: comments_count
-        type: Int64
-      - name: reading_time_minutes
-        type: Int64
-      - name: tag_list
-        type: Utf8
-
   - name: articles
     description: Public articles by a given dev.to username. No auth required.
     request:
@@ -156,3 +101,4 @@ tables:
 
 test_queries:
   - "SELECT id, name FROM devto.tags LIMIT 1"
+  - "SELECT id, title FROM devto.articles WHERE username = 'ben' LIMIT 1"
