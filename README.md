@@ -21,8 +21,13 @@ Built solo for **Pirates of the Coral-bean** · Track 1 · May 2026.
 
 ## Demo
 
-![ShipMind dashboard](docs/dashboard.png)
-<!-- Replace the placeholder above with a real screenshot or GIF before submission. -->
+![ShipMind dashboard — score 40, HOLD verdict, all 6 sources connected, Groq Llama 3.3 70B analysis](docs/shipmind_dashboard.png)
+
+Live run against `withcoral/coral`. **Score: 40 / HOLD.** The verdict
+cites a JWT auth blocker plus DB-pool exhaustion surfaced from Sentry
+— both confirmed by the team in `#releases` Slack. The header pill
+("Groq · Llama 3.3 70B") shows the active LLM; swap in
+`ANTHROPIC_API_KEY` and the same code talks to Claude instead.
 
 ## The Problem
 
