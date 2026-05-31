@@ -43,7 +43,7 @@ def _parse_table(raw: str) -> tuple[list[str], list[dict]]:
     return columns, rows
 
 
-def run_query(sql: str, timeout: int = 120) -> dict:
+def run_query(sql: str, timeout: int = 180) -> dict:
     """
     Execute a Coral SQL query.
     Returns: {
