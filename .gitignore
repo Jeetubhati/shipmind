@@ -23,3 +23,8 @@ node_modules/
 # OS junk
 Thumbs.db
 .DS_Store
+
+# Internal planning docs — kept locally, not shipped to the public repo
+docs/demo_script.md
+docs/submission_checklist.md
+docs/dashboard_snapshot.html

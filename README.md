@@ -200,8 +200,7 @@ shipmind/
 ├── tests/queries.sql               # the original cross-source JOIN
 ├── docs/
 │   ├── blog_post.md
-│   ├── demo_script.md
-│   └── submission_checklist.md
+│   └── shipmind_dashboard.png
 ├── .env.example
 ├── requirements.txt
 └── README.md
@@ -220,8 +219,8 @@ shipmind/
 ## Also included
 
 - **dev.to (Forem) community source** — submitted as a PR to
-  `withcoral/coral`. See `sources/devto/devto.yaml` and the PR linked in
-  `docs/submission_checklist.md`.
+  [`withcoral/coral`](https://github.com/withcoral/coral). See
+  `sources/devto/devto.yaml`.
 - **`slack_messages` custom source** — gives `slack.messages(…)` a
   regular-table interface. Lives in `sources/slack_messages/`.
 
