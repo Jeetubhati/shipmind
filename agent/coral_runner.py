@@ -63,6 +63,8 @@ def run_query(sql: str, timeout: int = 180) -> dict:
             ["coral", "sql", sql_clean],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=timeout,
         )
         duration_ms = int((time.time() - start) * 1000)
