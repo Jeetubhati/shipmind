@@ -1,6 +1,6 @@
 # ShipMind — Release Intelligence Agent
 
-> Know before you ship. Powered by Coral + Claude.
+> Know before you ship. Powered by Coral + an LLM of your choice (Groq Llama 3.3 70B by default; Anthropic Claude Sonnet 4.6 supported).
 
 ShipMind is a release-readiness agent that joins **GitHub, Linear, Sentry,
 and Slack in a single SQL query** to answer the question every engineer
@@ -12,8 +12,10 @@ asks before tagging a release:
 -  **What is the team actually saying about the release?** (Slack)
 -  **Are we on track this sprint?** (Linear)
 
-Then it asks **Claude** to look at all of that and give you one
-recommendation: **SHIP / SHIP WITH CAUTION / HOLD** plus a 0–100 score.
+Then it asks an LLM (**Groq's Llama 3.3 70B** by default, or
+**Anthropic's Claude Sonnet 4.6** if you'd rather) to look at all of
+that and give you one recommendation: **SHIP / SHIP WITH CAUTION /
+HOLD** plus a 0–100 score.
 
 Built solo for **Pirates of the Coral-bean** · Track 1 · May 2026.
 
@@ -40,8 +42,9 @@ one dashboard backed by one SQL query language.**
                   └──────────┬───────────┘
                              │
                   ┌──────────▼───────────┐
-                  │   Claude  (Sonnet 4.6) │  ← analysis + score
-                  │  agent/analyzer.py    │
+                  │  Groq (Llama 3.3 70B) │  ← analysis + score
+                  │  or Anthropic Claude  │     (auto-detected;
+                  │  agent/analyzer.py    │      stub if neither)
                   └──────────┬───────────┘
                              │
                   ┌──────────▼───────────┐
@@ -157,11 +160,18 @@ coral source add --file sources\slack_messages\slack_messages.yaml
 
 ```powershell
 Copy-Item .env.example .env
-# Edit .env: ANTHROPIC_API_KEY, GITHUB_ORG, GITHUB_REPO, SLACK_CHANNEL_ID, etc.
+# Edit .env: set GROQ_API_KEY (free at console.groq.com) or
+# ANTHROPIC_API_KEY (console.anthropic.com), plus GITHUB_ORG,
+# GITHUB_REPO, SLACK_CHANNEL_ID, etc.
 .\venv\Scripts\Activate.ps1
 python web\app.py
 # Open http://localhost:5000
 ```
+
+ShipMind auto-detects the LLM provider at startup:
+- `GROQ_API_KEY` set → Groq via OpenAI-compatible API (default model: `llama-3.3-70b-versatile`)
+- `ANTHROPIC_API_KEY` set → Anthropic (default model: `claude-sonnet-4-6`)
+- Neither set → deterministic stub analysis so the dashboard still demos
 
 ## Repo layout
 
@@ -198,7 +208,7 @@ shipmind/
 |---|---|
 | **Impact** | Every team ships code; the 4-tab pre-release ritual is universal. |
 | **Creativity** | Proactive release-gate, not a reactive incident tool. |
-| **Technical** | 6 sources (4 bundled + 2 custom-authored), real cross-source JOINs, Claude analysis layer with graceful no-key fallback. |
+| **Technical** | 6 sources (4 bundled + 2 custom-authored), real cross-source JOINs, pluggable LLM layer (Groq or Anthropic) with graceful no-key stub fallback. |
 | **Best Use of Coral** | The GitHub ⋈ Sentry time-overlap JOIN is the unique value — impossible without Coral. |
 | **Aesthetics** | Dark dashboard, animated score gauge, severity-coloured tables, no external dependencies. |
 

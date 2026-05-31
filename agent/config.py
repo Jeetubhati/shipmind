@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+GROQ_API_KEY     = os.getenv("GROQ_API_KEY", "")
 GITHUB_ORG       = os.getenv("GITHUB_ORG", "")
 GITHUB_REPO      = os.getenv("GITHUB_REPO", "")
 LINEAR_ORG_SLUG  = os.getenv("LINEAR_ORG_SLUG", "")
@@ -12,6 +13,8 @@ SLACK_CHANNEL_ID = os.getenv("SLACK_CHANNEL_ID", "")
 LINEAR_TEAM_KEY  = os.getenv("LINEAR_TEAM_KEY", "SHI")
 
 CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6")
+GROQ_MODEL   = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+GROQ_BASE_URL = os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1")
 
 CORAL_CONTEXT = f"""
 You query data using Coral SQL. Available sources and key tables:
