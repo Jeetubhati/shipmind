@@ -36,23 +36,42 @@ demo runs on **Groq** because it's fast (~1 s per analysis) and free.
 
 ## [0:20 – 0:45] The Coral foundation
 
-*Switch to the terminal window.*
+*Switch to the terminal window. The query should already be in your
+history — press Up arrow to recall it.*
 
 ```powershell
-coral sql "SELECT schema_name, table_name FROM coral.tables WHERE schema_name IN ('github','linear','sentry','slack_messages') ORDER BY schema_name, table_name LIMIT 20"
+coral sql "SELECT schema_name AS source, COUNT(*) AS tables FROM coral.tables WHERE schema_name != 'coral' GROUP BY schema_name ORDER BY schema_name"
+```
+
+Expected output (one frame, no scrolling — perfect for the camera):
+
+```
++----------------+--------+
+| source         | tables |
++----------------+--------+
+| devto          | 2      |
+| github         | 362    |
+| linear         | 8      |
+| sentry         | 12     |
+| slack          | 2      |
+| slack_messages | 1      |
++----------------+--------+
 ```
 
 > "Coral turns four developer APIs into SQL tables — GitHub, Linear,
-> Sentry, and a custom Slack messages source I wrote. ShipMind queries
-> all of them at once. Here are the tables it sees."
+> Sentry, Slack — that's 384 tables total. Plus my custom
+> `slack_messages` source for queryable channel history, and the
+> `devto` bounty source I submitted to Coral itself. ShipMind queries
+> all of them at once."
 
-*Output scrolls. Pause for ~3 s.*
+*Pause for ~3 s on this output before switching back to the browser.
+The `362` for GitHub is the visual hook — point at it if you like.*
 
 ## [0:45 – 1:10] The dashboard, already warm
 
 *Switch to the browser. Scroll to the top.*
 
-> "Here's the dashboard. The score is **74 — Ship with Caution**.
+> "Here's the dashboard. The score is **20 — Hold**.
 > Llama 3.3 70B generated this by looking at the results of all 5
 > release checks at once."
 
