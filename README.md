@@ -1,4 +1,4 @@
-# 🚢 ShipMind — Release Intelligence Agent
+# ShipMind — Release Intelligence Agent
 
 > Know before you ship. Powered by Coral + Claude.
 
@@ -6,11 +6,11 @@ ShipMind is a release-readiness agent that joins **GitHub, Linear, Sentry,
 and Slack in a single SQL query** to answer the question every engineer
 asks before tagging a release:
 
-- 🔴 **What errors will block this release?** (Sentry)
-- 🟡 **Are all planned features actually merged?** (Linear ⋈ GitHub)
-- 🟠 **What did the last few merges break in production?** (GitHub ⋈ Sentry)
-- 💬 **What is the team actually saying about the release?** (Slack)
-- 📈 **Are we on track this sprint?** (Linear)
+-  **What errors will block this release?** (Sentry)
+-  **Are all planned features actually merged?** (Linear ⋈ GitHub)
+-  **What did the last few merges break in production?** (GitHub ⋈ Sentry)
+-  **What is the team actually saying about the release?** (Slack)
+-  **Are we on track this sprint?** (Linear)
 
 Then it asks **Claude** to look at all of that and give you one
 recommendation: **SHIP / SHIP WITH CAUTION / HOLD** plus a 0–100 score.
@@ -97,11 +97,11 @@ ShipMind runs five checks and asks Claude to score them 0–100:
 
 | Check | Sources | Typical latency on our test data |
 |---|---|---|
-| 🔴 Release Blockers | sentry | ~2 s |
-| 🟡 Feature Readiness | linear ⋈ github.pulls | ~30–60 s (GitHub paginates) |
-| 🟠 Risk Assessment | github.pulls ⋈ sentry.issues | ~30 s (GitHub paginates) |
-| 💬 Team Signals | slack_messages | ~1 s |
-| 📈 Sprint Velocity | linear | ~3 s |
+|  Release Blockers | sentry | ~2 s |
+|  Feature Readiness | linear ⋈ github.pulls | ~30–60 s (GitHub paginates) |
+|  Risk Assessment | github.pulls ⋈ sentry.issues | ~30 s (GitHub paginates) |
+|  Team Signals | slack_messages | ~1 s |
+|  Sprint Velocity | linear | ~3 s |
 
 Full check totals ~90 s against a 500-PR repo; individual cards run
 on demand from the dashboard and stay snappy for everything except
